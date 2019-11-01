@@ -1,4 +1,4 @@
-﻿	PRESERVE8							; 8-битное выравнивание стека директива для компилятора 
+	PRESERVE8							; 8-битное выравнивание стека директива для компилятора 
 	THUMB								; Режим Thumb (AUL) инструкций будем работать с тамб 2 инструкциями
 
 	GET	config.s						; include-файлы
@@ -45,7 +45,7 @@ init
 	
 softPwmButt	
 	LDR R1, =GPIO_IDR_IDR0
-	LDR R2, =GPIO_IDR_IDR1
+	LDR R2, =GPIO_IDR_IDR1              ;0x02
 	
     MOV32	R3, PERIPH_BB_BASE + \
 			GPIOC_IDR * 32 + \
@@ -116,8 +116,6 @@ flagsControl
 	CMP	R9, #5
 	BEQ.W	while5
 	
-	CMP	R9, #6 
-	BEQ.W	while6
 	
 	B	flagsControl
 
@@ -203,12 +201,12 @@ while3									;flags number #3 переход назад либо на №2 л�
 	MOV   R11, #(PIN9)
 	STR   R11, [R10]
 	
-	BL whileDelay2
+	BL whileDelay3
 	
 	MOV	  R11, #(PIN9 << 16)
 	STR   R11, [R10]
 	
-	BL	delayWhile2
+	BL	delayWhile3
 	
 	MOV32	R5, PERIPH_BB_BASE + \
 			GPIOC_IDR * 32 + \
@@ -234,12 +232,12 @@ while4										; переход либо на 3 либо на 5 с задерж
 	MOV   R11, #(PIN9)
 	STR   R11, [R10]
 	
-	BL whileDelay3
+	BL whileDelay4
 	
 	MOV	  R11, #(PIN9 << 16)
 	STR   R11, [R10]
 	
-	BL	delayWhile3
+	BL	delayWhile4
 	
 	MOV32	R5, PERIPH_BB_BASE + \
 			GPIOC_IDR * 32 + \
@@ -259,37 +257,7 @@ while4										; переход либо на 3 либо на 5 с задерж
 	BNE	flagsSet4
 	B	while4
 	
-while5											; переход либо на 4 либо на 6 с задержкой вайла 4 
-	MOV32 R10, GPIOC_BSRR
-	MOV   R11, #(PIN9)
-	STR   R11, [R10]
-	
-	BL whileDelay4
-	
-	MOV	  R11, #(PIN9 << 16)
-	STR   R11, [R10]
-	
-	BL	delayWhile4
-	
-	MOV32	R5, PERIPH_BB_BASE + \
-			GPIOC_IDR * 32 + \
-			1 * 4	
-			
-	LDR R4,[R5]
-	ADD R4, #0x1
-	CMP R2, R4	
-	BNE	flagsSet3
-	
-	MOV32	R3, PERIPH_BB_BASE + \
-			GPIOC_IDR * 32 + \
-			0 * 4	
-			
-	LDR R4,[R3]
-	CMP R1, R4	
-	BNE	flagsSet5
-	B while5
-	
-while6
+while5
 	MOV32 R10, GPIOC_BSRR
 	MOV   R11, #(PIN9)
 	STR   R11, [R10]
@@ -301,9 +269,9 @@ while6
 	LDR R4,[R5]
 	ADD R4, #0x1
 	CMP R2, R4	
-	BNE	flagsSet4 
+	BNE	flagsSet3 
 	 
-	B	while6
+	B	while5
 
 flagsSet0
 	BL delayRead
@@ -314,7 +282,7 @@ flagsSet
 	MOV R9, #1
 	B   flagsControl		;softPwm
 flagsSet1
-	;BL delayRead
+	BL delayRead
 	MOV R9, #2
 	B	flagsControl		;Butt
 flagsSet2
@@ -329,10 +297,7 @@ flagsSet4
 	BL delayRead
 	MOV R9, #5
 	B	flagsControl		;Butt
-flagsSet5
-	BL delayRead
-	MOV R9, #6
-	B	flagsControl		;Butt
+
 
 whileDelay1
 	PUSH	{R0}	
